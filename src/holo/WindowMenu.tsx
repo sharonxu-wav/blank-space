@@ -12,26 +12,30 @@ export const WINDOW_MENU =
   typeof location === "undefined" || !/carousel|spin/i.test(location.search + location.hash + location.pathname);
 
 const HOLD = 0.7;
-const LS_KEY = "winmenu-layouts-v3";
+const LS_KEY = "winmenu-layouts-v4"; // bumped: fresh non-overlapping defaults
 type L = { x: number; y: number; w: number; h: number; ry: number; rx: number };
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
-// Balanced, centered layout: Music centered up top, the rest symmetric left/right.
-// left = margin from left edge, right = margin from right edge, center = horizontally centered.
+// Balanced layout — sizes are viewport-relative so the windows never overlap on small screens.
+// fy = top as fraction of height · fw/fh = width/height as fraction of viewport (then clamped).
+// The two rows (fy .30 and .64) leave a guaranteed gap on top of each side window.
 const DEFAULTS: Array<Record<string, any>> = [
-  { center: true, fy: 0.07, w: 480, h: 300, ry: 0,   rx: -5 }, // Music — centered, top, big
-  { left: 0.05,   fy: 0.40, w: 348, h: 244, ry: 14,  rx: -3 }, // upper-left
-  { left: 0.05,   fy: 0.68, w: 348, h: 244, ry: 14,  rx: 3 },  // lower-left
-  { right: 0.05,  fy: 0.40, w: 348, h: 244, ry: -14, rx: -3 }, // upper-right
-  { right: 0.05,  fy: 0.68, w: 348, h: 244, ry: -14, rx: 3 },  // lower-right
-  { center: true, fy: 0.70, w: 360, h: 236, ry: 0,   rx: 6 },  // spare (centered) for a future app
+  { center: true, fy: 0.05, fw: 0.26, fh: 0.30, ry: 0,   rx: -5 }, // Music — centered, top
+  { left: 0.035,  fy: 0.30, fw: 0.18, fh: 0.25, ry: 14,  rx: -3 }, // upper-left
+  { left: 0.035,  fy: 0.64, fw: 0.18, fh: 0.25, ry: 14,  rx: 3 },  // lower-left
+  { right: 0.035, fy: 0.30, fw: 0.18, fh: 0.25, ry: -14, rx: -3 }, // upper-right
+  { right: 0.035, fy: 0.64, fw: 0.18, fh: 0.25, ry: -14, rx: 3 },  // lower-right
+  { center: true, fy: 0.64, fw: 0.20, fh: 0.25, ry: 0,   rx: 6 },  // Air Canvas — centered, bottom
 ];
 
 function initialLayouts(): L[] {
-  const W = window.innerWidth;
+  const W = window.innerWidth, H = window.innerHeight;
   const defs = APPS.map((_, i) => {
     const d = DEFAULTS[i % DEFAULTS.length];
-    const x = d.center ? (W - d.w) / 2 : d.right != null ? W - d.w - d.right * W : (d.left ?? 0) * W;
-    return { x, y: d.fy * window.innerHeight, w: d.w, h: d.h, ry: d.ry, rx: d.rx };
+    const w = clamp(d.fw * W, 210, 360);
+    const h = clamp(d.fh * H, 150, 232);
+    const x = d.center ? (W - w) / 2 : d.right != null ? W - w - d.right * W : (d.left ?? 0) * W;
+    return { x, y: d.fy * H, w, h, ry: d.ry, rx: d.rx };
   });
   try {
     const saved = JSON.parse(localStorage.getItem(LS_KEY) || "null");

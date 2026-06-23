@@ -74,20 +74,17 @@ export default function HoloPlayer() {
     setStarted(true);
   }
 
-  useEffect(() => { startTracking(); }, []);
+  // Skip the ENTER screen — boot straight into the initiation sequence on load.
+  // Camera + hand-tracking start in parallel and come up during the boot animation.
+  useEffect(() => { startTracking(); enter(); }, []);
 
-  // open-hand on the loading screen → enter
+  // Web Audio starts suspended without a user gesture — resume on the first interaction.
   useEffect(() => {
-    if (started) return;
-    let raf = 0, held = 0, last = performance.now();
-    const loop = () => {
-      const now = performance.now(), dt = (now - last) / 1000; last = now;
-      if (hand.present && hand.open) { held += dt; if (held >= 0.7) enter(); } else held = 0;
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [started]);
+    const resume = () => resumeAudio();
+    window.addEventListener("pointerdown", resume, { once: true });
+    window.addEventListener("keydown", resume, { once: true });
+    return () => { window.removeEventListener("pointerdown", resume); window.removeEventListener("keydown", resume); };
+  }, []);
 
   const dim = view !== "home" && view !== "music";
 
@@ -155,12 +152,10 @@ export default function HoloPlayer() {
       {started && view === "gesturefx" && <GestureFxApp />}
       {started && view === "chordlab" && <ChordLabApp />}
 
-      {!started && (
-        <div className="loading-screen">
-          <video className="ls-video" src={import.meta.env.BASE_URL + "loading.mp4"} autoPlay loop muted playsInline />
-          <button onClick={enter} className="ls-enter">ENTER ✋</button>
-          {err && <p className="ls-err">{err}</p>}
-        </div>
+      {err && (
+        <div style={{ position: "absolute", bottom: 18, left: "50%", transform: "translateX(-50%)", zIndex: 60,
+          color: "#9fe8ff", background: "rgba(2,8,14,.72)", border: "1px solid rgba(95,230,255,.3)",
+          borderRadius: 20, padding: "8px 16px", fontSize: 13, letterSpacing: ".04em" }}>{err} ✋</div>
       )}
     </div>
   );
