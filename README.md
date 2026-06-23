@@ -1,6 +1,6 @@
 # 🖐️ Blank Space
 
-A hand-tracked, Iron-Man-inspired holographic OS you control with your webcam — a place to vent, play, and unwind. No mouse, no keyboard: **point, pinch, swipe, and fist.**
+A hand-tracked, Iron-Man-inspired holographic OS you control with your webcam — a place to vent, play, and unwind. **point, pinch, swipe, and fist.**
 
 **▸ Live:** https://sharonxu-wav.github.io/blank-space/
 **▸ Breakdown:** https://sharonxu-wav.github.io/blank-space/breakdown.html
