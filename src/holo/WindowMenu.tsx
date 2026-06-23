@@ -7,8 +7,9 @@ import { blip } from "./boot";
 // Experimental menu: floating "browser windows" you can drag + resize to your liking (persisted).
 // Hand: hover a window then PINCH or hold ~0.7s to open. Mouse: drag the title bar to move,
 // drag the corner to resize, click the body to open. Enable with ?windows.
+// Floating-window menu is the DEFAULT now. The old grab carousel is still reachable via ?carousel.
 export const WINDOW_MENU =
-  typeof location !== "undefined" && /windows|winmenu/i.test(location.search + location.hash + location.pathname);
+  typeof location === "undefined" || !/carousel|spin/i.test(location.search + location.hash + location.pathname);
 
 const HOLD = 0.7;
 const LS_KEY = "winmenu-layouts-v3";
